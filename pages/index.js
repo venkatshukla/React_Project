@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { Dropdown, Card, Grid } from "semantic-ui-react";
+import { Dropdown, Card, Grid, Divider } from "semantic-ui-react";
 import Layout from "../components/Layout";
-
 const superagent = require("superagent");
 
+//Array for sorting options
 const sortOptions = [
     {
         key: "Category",
@@ -22,20 +22,22 @@ const sortOptions = [
     }
 ];
 
-class jsonparserIndex extends Component {
+class JsonparserIndex extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            products: props.products,
-            sortBy: "popularity"
+            products: props.products, //array storing all the products
+            sortBy: "popularity" //  the sortBy option
         };
     }
 
+    // Method triggered when sortBy option is changed
     handleChange = (e, { name, value }) => {
         this.setState({ sortBy: value });
         //console.log(this.state.sortBy);
     };
 
+    // Helper method for sorting function, 
     GetSortOrder(prop) {
         return function(a, b) {
             if (a[prop] > b[prop]) {
@@ -47,6 +49,7 @@ class jsonparserIndex extends Component {
         };
     }
 
+    // Generates and Returns cards group
     renderCards() {
         this.state.products.sort(this.GetSortOrder(this.state.sortBy));
         const productArray = this.state.products.map(product => {
@@ -67,7 +70,6 @@ class jsonparserIndex extends Component {
             <Layout>
                 <Grid>
                     <Grid.Column width={2} />
-
                     <Grid.Column width={14}>
                         <Grid.Row padded="vertically">
                             <span>
@@ -79,13 +81,12 @@ class jsonparserIndex extends Component {
                                     defaultValue={sortOptions[2].value}
                                 />
                             </span>
+                            <Divider />
                         </Grid.Row>
                         <Grid.Row padded="vertically">
                             {this.renderCards()}
                         </Grid.Row>
-                        <Grid.Row padded="vertically">
-                        {" "}
-                        </Grid.Row>
+                        <Divider />
                     </Grid.Column>
                 </Grid>
             </Layout>
@@ -93,7 +94,7 @@ class jsonparserIndex extends Component {
     }
 }
 
-jsonparserIndex.getInitialProps = async () => {
+JsonparserIndex.getInitialProps = async () => {
     let data = await superagent.get(
         "https://s3.ap-south-1.amazonaws.com/ss-local-files/products.json"
     );
@@ -110,4 +111,4 @@ jsonparserIndex.getInitialProps = async () => {
     return { products: items };
 };
 
-export default jsonparserIndex;
+export default JsonparserIndex;
