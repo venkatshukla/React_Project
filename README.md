@@ -1,7 +1,7 @@
 # assignment for smartserv
 
 ## Usage: 
-Run following commands inside assignment folder
+Run the following commands:
 1. npm install 
 2. npm run build
 3. npm run start 
