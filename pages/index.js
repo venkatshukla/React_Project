@@ -33,7 +33,7 @@ class jsonparserIndex extends Component {
 
     handleChange = (e, { name, value }) => {
         this.setState({ sortBy: value });
-        console.log(this.state.sortBy);
+        //console.log(this.state.sortBy);
     };
 
     GetSortOrder(prop) {
@@ -66,9 +66,9 @@ class jsonparserIndex extends Component {
         return (
             <Layout>
                 <Grid>
-                    <Grid.Column width={1} />
+                    <Grid.Column width={2} />
 
-                    <Grid.Column width={15}>
+                    <Grid.Column width={14}>
                         <Grid.Row padded="vertically">
                             <span>
                                 Sort Products by{" "}
@@ -107,7 +107,6 @@ jsonparserIndex.getInitialProps = async () => {
             popularity: parseInt(data.products[productId].popularity)
         };
     });
-    console.log(items);
     return { products: items };
 };
 
