@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Dropdown, Card, Grid, Divider } from "semantic-ui-react";
+import { Dropdown, Card, Grid, Divider, Input } from "semantic-ui-react";
 import Layout from "../components/Layout";
 const superagent = require("superagent");
 
@@ -27,7 +27,9 @@ class JsonparserIndex extends Component {
         super(props);
         this.state = {
             products: props.products, //array storing all the products
-            sortBy: "popularity" //  the sortBy option
+            sortBy: "popularity",
+            productList: [...props.products],
+            searchValue: "" //  the sortBy option
         };
     }
 
@@ -37,7 +39,7 @@ class JsonparserIndex extends Component {
         //console.log(this.state.sortBy);
     };
 
-    // Helper method for sorting function, 
+    // Helper method for sorting function,
     GetSortOrder(prop) {
         return function(a, b) {
             if (a[prop] > b[prop]) {
@@ -49,6 +51,80 @@ class JsonparserIndex extends Component {
         };
     }
 
+    handleSearch = (e, { name, value }) => {
+        this.setState({ searchValue: value });
+        console.log(value, this.state.searchValue);
+        var searchterm = value;
+        var terms = searchterm.split(" ");
+        console.log(terms);
+        var comparision = 0;
+        var price = 0;
+        if(terms.includes('below')){
+            comparision = 1;
+            price = parseInt(terms[terms.indexOf('below')+1]);
+        }
+        else if(terms.includes('above')){
+            comparision = 2;
+            price = parseInt(terms[terms.indexOf('above')+1]);
+        }   
+        var flag;
+        var searchType = terms.includes("or") ? 1 : 2; // 1 => or ,2 => and
+        console.log(comparision, price, searchType);
+
+        var searchResult = this.state.productList.filter(product => {
+            if (searchType == 1) {
+                flag = false;
+                var productTerms = product.title.toLowerCase().split(" ");
+                terms.forEach(element => {
+                    if (
+                        element != "or" &&
+                        element != "and" &&
+                        element != "below" &&
+                        element != "above" &&
+                        element != price &&
+                        productTerms.includes(element.toLowerCase()) 
+                    ) {
+                        flag = true;
+                    }
+                });
+            } else {
+                flag = true;
+                var productTerms = product.title.toLowerCase().split(" ");
+                terms.forEach(element => {
+                    if (
+                        element != "or" &&
+                        element != "and" &&
+                        element != "below" &&
+                        element != "above" &&
+                        element != price &&
+                        !productTerms.includes(element.toLowerCase())
+                    ) {
+                        flag = false;
+                    }
+                });
+            }
+            return flag;
+        });
+        console.log(searchResult);
+        if(comparision>0){
+            var results = searchResult.filter((product)=>{
+
+                console.log(product.price, price, comparision);
+                if(comparision==1 && product.price > price){
+                    return false;
+                }
+                if(comparision==2 && product.price < price){
+                    return false;
+                }
+                return true;
+            });
+    
+            this.setState({ products: results });
+        }
+        else this.setState({ products: searchResult });
+
+        
+    };
     // Generates and Returns cards group
     renderCards() {
         this.state.products.sort(this.GetSortOrder(this.state.sortBy));
@@ -81,6 +157,12 @@ class JsonparserIndex extends Component {
                                     defaultValue={sortOptions[2].value}
                                 />
                             </span>
+                            <Divider />
+                            <Input
+                                placeholder="Search..."
+                                onChange={this.handleSearch}
+                                value={this.state.searchValue}
+                            />
                             <Divider />
                         </Grid.Row>
                         <Grid.Row padded="vertically">
