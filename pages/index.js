@@ -29,6 +29,7 @@ class JsonparserIndex extends Component {
             products: props.products, //array storing all the products
             sortBy: "popularity",
             productList: [...props.products],
+            loading: false,
             searchValue: "" //  the sortBy option
         };
     }
@@ -52,24 +53,21 @@ class JsonparserIndex extends Component {
     }
 
     handleSearch = (e, { name, value }) => {
-        this.setState({ searchValue: value });
-        console.log(value, this.state.searchValue);
+        this.setState({ searchValue: value, loading: true });
         var searchterm = value;
         var terms = searchterm.split(" ");
-        console.log(terms);
         var comparision = 0;
         var price = 0;
-        if(terms.includes('below')){
-            comparision = 1;
-            price = parseInt(terms[terms.indexOf('below')+1]);
-        }
-        else if(terms.includes('above')){
-            comparision = 2;
-            price = parseInt(terms[terms.indexOf('above')+1]);
-        }   
         var flag;
+
+        if (terms.includes("below")) {
+            comparision = 1;
+            price = parseInt(terms[terms.indexOf("below") + 1]);
+        } else if (terms.includes("above")) {
+            comparision = 2;
+            price = parseInt(terms[terms.indexOf("above") + 1]);
+        }
         var searchType = terms.includes("or") ? 1 : 2; // 1 => or ,2 => and
-        console.log(comparision, price, searchType);
 
         var searchResult = this.state.productList.filter(product => {
             if (searchType == 1) {
@@ -82,7 +80,8 @@ class JsonparserIndex extends Component {
                         element != "below" &&
                         element != "above" &&
                         element != price &&
-                        productTerms.includes(element.toLowerCase()) 
+                        element.length != 0 &&
+                        productTerms.includes(element.toLowerCase())
                     ) {
                         flag = true;
                     }
@@ -97,33 +96,24 @@ class JsonparserIndex extends Component {
                         element != "below" &&
                         element != "above" &&
                         element != price &&
+                        element.length != 0 &&
                         !productTerms.includes(element.toLowerCase())
                     ) {
                         flag = false;
                     }
                 });
             }
+            if (flag == true && comparision != 0 && price && !isNaN(price)) {
+                if (comparision == 1 && product.price > price) {
+                    flag = false;
+                }
+                if (comparision == 2 && product.price < price) {
+                    flag = false;
+                }
+            }
             return flag;
         });
-        console.log(searchResult);
-        if(comparision>0){
-            var results = searchResult.filter((product)=>{
-
-                console.log(product.price, price, comparision);
-                if(comparision==1 && product.price > price){
-                    return false;
-                }
-                if(comparision==2 && product.price < price){
-                    return false;
-                }
-                return true;
-            });
-    
-            this.setState({ products: results });
-        }
-        else this.setState({ products: searchResult });
-
-        
+        this.setState({ products: searchResult, loading: false });
     };
     // Generates and Returns cards group
     renderCards() {
@@ -160,6 +150,9 @@ class JsonparserIndex extends Component {
                             <Divider />
                             <Input
                                 placeholder="Search..."
+                                loading={this.state.loading}
+                                icon='search'
+                                size='big'
                                 onChange={this.handleSearch}
                                 value={this.state.searchValue}
                             />
