@@ -1,5 +1,3 @@
-# assignment for smartserv
-
 ## Usage: 
 Run the following commands:
 1. npm install 
